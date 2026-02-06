@@ -1,0 +1,7 @@
+must compile your code with g++ -o myprogram gpioTesting.cc -lpigpio -lrt -lpthread
+
+there was a problem linking the libpigpio.d, but adding something to the linker config worked. I am not an operating systems guy, I don't know
+this is the command that worked: echo "/usr/local/lib" | sudo tee /etc/ld.so.conf.d/pigpio.conf
+sudo ldconfig
+
+
