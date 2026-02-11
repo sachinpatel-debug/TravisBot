@@ -1,5 +1,8 @@
 #include <iostream>
 #include <pigpio.h>
+#include <unistd.h>
+#include <string>
+#include "mp3Player.h"
 using namespace std;
 
 int main() {
@@ -7,22 +10,23 @@ int main() {
 	const int motorPin = 12;
 	//gpioInitialise();
 	cout<<"Using pigpio version" <<gpioVersion()<<endl;
+
 	gpioInitialise();
 	const char* device = "/dev/serial0";
 	int serial = serOpen((char*)device,9600,0);
-	uint8_t version = 0xFF; //will always be this
-	uint8_t length = 0x06; //will always be this
-	uint8_t cmd = 0x03; //play track
-	uint8_t feedback = 0x00; //0 means no feedback
-	uint8_t highParameter = 0x00;  
-	uint8_t lowParameter = 0x02;
+	mp3Player mp3;
+	cout<<"here is a test cmd is 1 here it is " << (int)mp3.cmd <<endl;
+	int trackToPlay = 3;
+	mp3.playTrack(trackToPlay);
+	cout<<"now it should be 3 here is is " <<(int)mp3.cmd <<endl;
+	for(int i=0;i<10;i++){
+		cout<<"Data: "<<(int)mp3.data[i]<<endl;
+		}
+	int dataLen = 10;
+	//serWrite(serial,reinterpret_cast<char*>(mp3.data), dataLen);
+	mp3.playTrack(4);
+	serWrite(serial,reinterpret_cast<char*>(mp3.data), dataLen);
 
-	uint16_t checksum = 0xFFFF - (version + length + cmd + feedback + highParameter + lowParameter)+1; 
-	uint8_t checksumHigh = (checksum >> 8) & 0xFF;
-	uint8_t checksumLow = (checksum & 0xFF);
-	uint8_t data[] = {0x7E, version, length, cmd, feedback, highParameter, lowParameter, checksumHigh, checksumLow, 0xEF };
-	int dataLen = sizeof(data);
-	serWrite(serial, (char*)data, dataLen);
 	serClose(serial);
 	while(true){
 	gpioHardwarePWM(servoPin, 50, 300000);
